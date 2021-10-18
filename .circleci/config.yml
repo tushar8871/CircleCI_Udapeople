@@ -39,8 +39,7 @@ commands:
       - run:
           name: Install Node Dependencies
           command: |
-            apk add --update ansible curl npm nodejs rsync openssh
-            pip3 install awscli
+            yum install -y tar gzip curl npm openssh nodejs rsync
             npm --version
       - run:
           name: Revert migrations
@@ -399,7 +398,7 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" \
               --tags project=udapeople
             
-            CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
+            export CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
 
             if [["$CurrentWorkflowID" != "$OldWorkflowID" ]]
             then
