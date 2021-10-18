@@ -1,0 +1,27 @@
+---
+  - name: "show remote environment"
+    shell: env
+
+  - name: "copy backend binaries"
+    become: yes
+    synchronize:
+      src: ../../backend/
+      dest: /home/ubuntu/udapeople
+      recursive: true
+
+  - name: "install npm to  backend" 
+    become: true
+    command: npm install
+    args:
+      chdir: /home/ubuntu/udapeople
+
+  - name: "delete anything that might already be running"
+    become: true
+    command: pm2 delete all
+    ignore_errors: true
+
+  - name: "start server"
+    become: true
+    command: pm2 start npm -- run start
+    args:
+      chdir: /home/ubuntu/udapeople

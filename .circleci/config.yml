@@ -1,26 +1,155 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+orbs:
+  welcome: circleci/welcome-orb@0.4.1
+
+commands:
+  destroy_environment:
+    description: Destroy Cloud Formation Stacks and infrastructure
+    parameters:
+      when:
+        type: string
+      id:
+        type: string
+    steps:
+      - run:
+          name: Destroy udapeople backend cfn stack
+          command: |
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.id >>
+          environment:
+            TERM: xterm-256color
+          when: << parameters.when >>
+      - run:
+          name: Destroy udapeople frontend cfn stack and S3 bucket
+          command: |
+            aws s3 rm "s3://frontend-udapeople-<< parameters.id >>" --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.id >>
+          environment:
+              TERM: xterm-256color
+          when: << parameters.when >>
+
+  revert_migrations:
+    description: Revert the last migration when successfully excecute in current job.
+    parameters:
+      when:
+        type: string
+      id:
+        type: string
+    steps:
+      - run:
+          name: Revert migrations
+          working_directory: ./backend
+          command: |
+            SUCCESS=$(curl -H "token: 3b83cd84-cf9f-451f-a7cd-9fbc3fed481d" --request GET https://api.memstash.io/values/DB_Migration_${CIRCLE_WORKFLOW_ID:0:5})
+            echo $SUCCESS
+            if [[ "$SUCCESS" == "success" ]]
+            then
+              npm run migrations:revert
+            fi
+          when: << parameters.when >>
+
+jobs: 
+  build_backend:
     docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: npm install and build
+          working_directory: ./backend
+          command: |
+            npm install
+            npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - backend/node_modules
+            - backend/dist
+           
+  build_frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: npm install and build
+          working_directory: ./frontend
+          command: |
+            npm install
+            npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - frontend/node_modules
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+  backend_test:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+         name: npm test 
+         working_directory: ./backend
+         command: |
+           npm run test
+
+  frontend_test:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+         name: npm test 
+         working_directory: ./frontend
+         command: |
+           npm run test
+
+  backend_scan:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+         name: Scan Vulnerabilities Backend 
+         working_directory: ./backend
+         command: |
+           npm audit fix --audit-level critical
+
+  frontend_scan:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+         name: Scan Vulnerabilities Frontend 
+         working_directory: ./frontend
+         command: |
+           npm install
+           npm audit fix --audit-level critical
+
 workflows:
-  say-hello-workflow:
+  version: 2
+  welcome:
     jobs:
-      - say-hello
+      - build_backend
+      - build_frontend
+      - backend_test:
+          requires:
+            - build_backend
+      - frontend_test:
+          requires:
+            - build_frontend
+      - backend_scan:
+          requires:
+            - build_backend 
+      - frontend_scan:
+          requires:
+           - build_frontend
