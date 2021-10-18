@@ -416,7 +416,7 @@ workflows:
  #            branches:
  #              only:
  #                - circleci-project-setup
-      - build_frontend #:
+ #     - build_frontend #:
  #          filters:
  #            branches:
  #              only:
@@ -428,9 +428,9 @@ workflows:
 #             branches:
 #               only:
 #                 - circleci-project-setup
-      - frontend_test:
-          requires:
-            - build_frontend
+#      - frontend_test:
+#          requires:
+#            - build_frontend
  #         filters:
  #            branches:
  #              only:
