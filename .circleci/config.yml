@@ -119,7 +119,7 @@ jobs:
          name: Scan Vulnerabilities Backend 
          working_directory: ./backend
          command: |
-           npm audit fix --audit-level critical
+           npm audit fix --audit-level critical --force
 
   frontend_scan:
     docker:
@@ -133,7 +133,7 @@ jobs:
          working_directory: ./frontend
          command: |
            npm install
-           npm audit fix --audit-level critical
+           npm audit fix --audit-level critical --force
 
   create_infrastructure:
     docker:
@@ -411,46 +411,46 @@ workflows:
   version: 2
   welcome:
     jobs:
-      - build_backend:
-           filters:
-             branches:
-               only:
-                 - circleci-project-setup
-      - build_frontend:
-           filters:
-             branches:
-               only:
-                 - circleci-project-setup
+      - build_backend #:
+ #          filters:
+ #            branches:
+ #              only:
+ #                - circleci-project-setup
+      - build_frontend #:
+ #          filters:
+ #            branches:
+ #              only:
+ #                - circleci-project-setup
       - backend_test:
           requires:
             - build_backend
-          filters:
-             branches:
-               only:
-                 - circleci-project-setup
+#          filters:
+#             branches:
+#               only:
+#                 - circleci-project-setup
       - frontend_test:
           requires:
             - build_frontend
-          filters:
-             branches:
-               only:
-                 - circleci-project-setup
+ #         filters:
+ #            branches:
+ #              only:
+ #                - circleci-project-setup
       - backend_scan:
           requires:
             - build_backend 
-          filters:
-             branches:
-               only:
-                 - circleci-project-setup
+ #         filters:
+ #            branches:
+ #              only:
+ #                - circleci-project-setup
       - frontend_scan:
           requires:
            - build_frontend 
-          filters:
-             branches:
-               only:
-                 - circleci-project-setup
-      - create_infrastructure
-#          requires: [frontend_test, backend_test, frontend_scan, backend_scan]
+ #         filters:
+ #            branches:
+ #              only:
+ #                - circleci-project-setup
+      - create_infrastructure:
+          requires: [frontend_test, backend_test, frontend_scan, backend_scan]
 ##          filters:
 #             branches:
 #               only:
