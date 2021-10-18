@@ -449,7 +449,8 @@ workflows:
  #            branches:
  #              only:
  #                - circleci-project-setup
-      - create_infrastructure #:
+      - create_infrastructure:
+           requires: [backend_test,backend_scan]
 #          requires: [frontend_test, backend_test, frontend_scan, backend_scan]
 ##          filters:
 #             branches:
