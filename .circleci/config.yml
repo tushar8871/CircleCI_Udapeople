@@ -393,7 +393,7 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" \
               --tags project=udapeople
             
-            export CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
+            export CurrentWorkflowID="${CIRCLE_WORKFLOW_ID:0:5}"
 
             if [["$CurrentWorkflowID" != "$OldWorkflowID" ]]
             then
