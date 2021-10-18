@@ -37,11 +37,6 @@ commands:
         type: string
     steps:
       - run:
-          name: Install Node Dependencies
-          command: |
-            yum install -y tar gzip curl npm openssh nodejs rsync
-            npm --version
-      - run:
           name: Revert migrations
           working_directory: ./backend
           command: |
