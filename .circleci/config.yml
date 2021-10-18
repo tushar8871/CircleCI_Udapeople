@@ -416,11 +416,11 @@ workflows:
  #            branches:
  #              only:
  #                - circleci-project-setup
- #     - build_frontend #:
- #          filters:
- #            branches:
- #              only:
- #                - circleci-project-setup
+      - build_frontend:
+          filters:
+            branches:
+              only:
+                - circleci-project-setup
       - backend_test:
           requires:
             - build_backend
@@ -428,9 +428,9 @@ workflows:
 #             branches:
 #               only:
 #                 - circleci-project-setup
-#      - frontend_test:
-#          requires:
-#            - build_frontend
+      - frontend_test:
+          requires:
+            - build_frontend
  #         filters:
  #            branches:
  #              only:
@@ -442,16 +442,15 @@ workflows:
  #            branches:
  #              only:
  #                - circleci-project-setup
- #     - frontend_scan:
- #         requires:
- #          - build_frontend 
- #         filters:
- #            branches:
- #              only:
- #                - circleci-project-setup
+      - frontend_scan:
+          requires:
+           - build_frontend 
+          filters:
+             branches:
+               only:
+                 - circleci-project-setup
       - create_infrastructure:
-           requires: [backend_test,backend_scan]
-#          requires: [frontend_test, backend_test, frontend_scan, backend_scan]
+          requires: [frontend_test, backend_test, frontend_scan, backend_scan]
 ##          filters:
 #             branches:
 #               only:
