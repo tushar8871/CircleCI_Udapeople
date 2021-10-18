@@ -37,6 +37,12 @@ commands:
         type: string
     steps:
       - run:
+          name: Install Node Dependencies
+          command: |
+            apk add --update ansible curl npm nodejs rsync openssh
+            pip3 install awscli
+            npm --version
+      - run:
           name: Revert migrations
           working_directory: ./backend
           command: |
@@ -396,7 +402,7 @@ jobs:
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
 
-            if [[ "${STACKS[@]}" =~ "$oldWorkflowID" ]]
+            if [[ "${STACKS[@]}" =~ "$OldWorkflowID" ]]
             then
              aws s3 rm "s3://frontend-udapeople-${OldWorkflowID}" --recursive
              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
