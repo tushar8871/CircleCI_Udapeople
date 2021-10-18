@@ -1,0 +1,37 @@
+Description: >
+  UdaPeople Stack Backend.
+
+Parameters:
+  ID:
+    Description: Unique identifier.
+    Type: String
+Resources: 
+  UdacitySG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: InstanceSG-${ID}
+      GroupDescription: Allow http to our EC2 instance
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3030
+          ToPort: 3030
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 9100
+          ToPort: 9100
+          CidrIp: 0.0.0.0/0
+  UdacityWebServerEC2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: "ami-09e67e426f25ce0d7"
+      KeyName: Udacity_IAC
+      InstanceType: t2.micro
+      SecurityGroups: 
+        - Ref: UdacitySG
+      Tags:
+        - Key: Name
+          Value: !Sub Backend_Udapeople-${ID}
